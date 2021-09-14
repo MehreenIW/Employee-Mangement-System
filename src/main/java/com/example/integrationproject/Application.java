@@ -5,56 +5,59 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @SpringBootApplication
+//@EnableScheduling
 public class Application implements CommandLineRunner {
-	@Autowired
-	private KimaiClient client;
-	@Autowired
-	private BambooClient bambooRestClient;
+    @Autowired
+    private KimaiClient client;
+    @Autowired
+    private BambooClient bambooRestClient;
+    public List<Integer> inMemoryDb = new ArrayList<Integer>();
 
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    @Override
+    public void run(String... args) throws Exception {
 
-	@Override
-	public void run(String... args) throws Exception {
+        Timer timer = new Timer("Timer");
+        int delay = 3000;
+        timer.scheduleAtFixedRate(task, 0L, (60 * 1000));
 
-//		int id = ThreadLocalRandom.current().nextInt(1000);
-//		Employee newUser = new Employee("Dosmf", "dfddd@yahoo.com", "jgdffgjhg", new String[]{"ROLE_DEVELOPER"});
-//		System.out.println("A newly created user "+ newUser);
-//		client.create(newUser);
+    }
 
-//		Employee employee = client.getById(id);
-//		System.out.println("A newly created user "+ employee);
+    //	@Scheduled(fixedRate = 60000)
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            List<KimaiEmployee> allUsers = client.getAllEmployees();
+            System.out.println("All the users : " + allUsers);
 
-		//	Get all employees
+            for (KimaiEmployee customer : allUsers) {
+                if (inMemoryDb.contains(customer.getId())) {
+                    System.out.println("User already present");
+                    //				continue;
+                } else {
+                    inMemoryDb.add(customer.getId());
+                    System.out.println("User not present");
 
-		List<KimaiEmployee> allUsers = client.getAllEmployees();
-		System.out.println("All the users : " + allUsers);
+                    KimaiEmployee specificUser = client.getById(customer.getId());
+                    String[] name = specificUser.getusername().split("\\s+|\\.");
+                    String firstName = name[0];
+                    String lastName = name[1];
 
-		for (KimaiEmployee customer : allUsers) {
-			System.out.println(customer.getusername());
-			System.out.println(customer.getId());
+                    BambooEmployee newEmployee = new BambooEmployee(firstName, lastName, Arrays.toString(specificUser.getRole()));
+                    bambooRestClient.addNewEmployee(newEmployee);
+                    System.out.println(newEmployee);
 
-			//	Get employee by id
+                }
 
-			KimaiEmployee specificUser = client.getById(customer.getId());
-			String[] name = specificUser.getusername().split("\\s+|\\.");
-			System.out.println(Arrays.toString(name));
-			String firstName = name[0];
-			String lastName = name[1];
+            }
+            System.out.println(inMemoryDb);
+        }
+    };
 
-			// POST
-
-			BambooEmployee newEmployee = new BambooEmployee(firstName, lastName, Arrays.toString(specificUser.getRole()));
-			System.out.println(newEmployee.getLastName());
-			bambooRestClient.addNewEmployee(newEmployee);
-			System.out.println(newEmployee);
-
-		}
-	}
 }
