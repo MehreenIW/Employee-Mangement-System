@@ -21,11 +21,12 @@ public class Application implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-
+    public void run(String[] args) throws Exception {
+        String argument = args[0];
+        int period = Integer.parseInt(argument);
+        System.out.println("The timer interval is : " + period + " min");
         Timer timer = new Timer("Timer");
-        int delay = 3000;
-        timer.scheduleAtFixedRate(task, 0L, (60 * 1000));
+        timer.scheduleAtFixedRate(task, 0L,period * (60 * 1000));
 
     }
 
