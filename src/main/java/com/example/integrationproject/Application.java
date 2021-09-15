@@ -5,16 +5,25 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Logger;
 
 @SpringBootApplication
-//@EnableScheduling
 public class Application implements CommandLineRunner {
+
+    private Logger logging = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     @Autowired
     private KimaiClient client;
+
     @Autowired
     private BambooClient bambooRestClient;
-    public List<Integer> inMemoryDb = new ArrayList<Integer>();
+
+    @Autowired
+    private InMemoryDb inMemoryDb;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -24,26 +33,25 @@ public class Application implements CommandLineRunner {
     public void run(String[] args) throws Exception {
         String argument = args[0];
         int period = Integer.parseInt(argument);
-        System.out.println("The timer interval is : " + period + " min");
+        logging.info("The timer interval is : " + period + " min");
         Timer timer = new Timer("Timer");
-        timer.scheduleAtFixedRate(task, 0L,period * (60 * 1000));
+        timer.scheduleAtFixedRate(task, 0L, period * (60 * 1000));
 
     }
 
-    //	@Scheduled(fixedRate = 60000)
     TimerTask task = new TimerTask() {
         @Override
         public void run() {
             List<KimaiEmployee> allUsers = client.getAllEmployees();
-            System.out.println("All the users : " + allUsers);
+            logging.info("All the users : " + allUsers);
 
             for (KimaiEmployee customer : allUsers) {
-                if (inMemoryDb.contains(customer.getId())) {
-                    System.out.println("User already present");
-                    //				continue;
+                if (inMemoryDb.getInMemoryDb().contains(customer.getId())) {
+                    logging.info("User already present");
+                    continue;
                 } else {
-                    inMemoryDb.add(customer.getId());
-                    System.out.println("User not present");
+                    inMemoryDb.getInMemoryDb().add(customer.getId());
+                    logging.info("User not present");
 
                     KimaiEmployee specificUser = client.getById(customer.getId());
                     String[] name = specificUser.getusername().split("\\s+|\\.");
@@ -57,7 +65,7 @@ public class Application implements CommandLineRunner {
                 }
 
             }
-            System.out.println(inMemoryDb);
+            logging.info(inMemoryDb.getInMemoryDb().toString());
         }
     };
 
