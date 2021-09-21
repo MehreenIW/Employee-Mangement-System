@@ -2,7 +2,6 @@ package com.example.integrationproject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -29,8 +28,4 @@ public class KimaiClient {
         return restTemplate.getForObject(baseurl + "/" + id, KimaiEmployee.class);
     }
 
-    public KimaiEmployee create(@RequestBody final KimaiEmployee newEmployee) {
-        return restTemplate.postForObject(baseurl, newEmployee, KimaiEmployee.class);
-
-    }
 }

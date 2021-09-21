@@ -24,7 +24,7 @@ public class Config {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder
-                .defaultHeader("authorization", bambooAuthentication)
+                .defaultHeader("authorization", "Basic " + bambooAuthentication)
                 .defaultHeader("X-AUTH-USER", kimaiUsername)
                 .defaultHeader("X-AUTH-TOKEN", kimaiPassword)
                 .setConnectTimeout(Duration.ofMillis(3000))

@@ -7,6 +7,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class BambooClient {
+
     @Value("${service.url.bamboo.employee}")
     private String baseUri;
 
