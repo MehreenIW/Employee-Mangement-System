@@ -65,7 +65,7 @@ public class Application implements CommandLineRunner {
                 }
 
             }
-            logging.info(inMemoryDb.getInMemoryDb().toString());
+            logging.info("ID of users in Kimai sent to Bamboo " + inMemoryDb.getInMemoryDb().toString());
         }
     };
 
